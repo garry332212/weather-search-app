@@ -32,15 +32,15 @@ interface WeatherDataProps {
 }
 
 const DisplayWeather = () => {
-  const api_key = "0cc86d16bf572f78cdc96c096c7627e5";
-  const api_Endpoint = "https://api.openweathermap.org/data/2.5/";
+  const api_key = process.env.REACT_APP_API_KEY;
+  const api_Endpoint = process.env.REACT_APP_API_ENDPOINT;
 
   const [weatherData, setWeatherData] = React.useState<WeatherDataProps | null>(
     null
   );
   const [isLoading, setIsLoading] = React.useState(false);
 
-  const [searchCity,setSearchCity] = React.useState("")
+  const [searchCity, setSearchCity] = React.useState("");
 
   const fetchCurrentWeather = async (lat: number, lon: number) => {
     const url = `${api_Endpoint}weather?lat=${lat}&lon=${lon}&appid=${api_key}&units=metric`;
@@ -48,31 +48,30 @@ const DisplayWeather = () => {
     return response.data;
   };
 
-  const fetchWeatherData = async(city:string) => {
-    try{
+  const fetchWeatherData = async (city: string) => {
+    try {
       const url = `${api_Endpoint}weather?q=${city}&appid=${api_key}&units=metric`;
       const searchResponse = await axios.get(url);
 
-      const currentWeatherData:WeatherDataProps = searchResponse.data;
-      return { currentWeatherData};
+      const currentWeatherData: WeatherDataProps = searchResponse.data;
+      return { currentWeatherData };
     } catch (error) {
       console.error("No Data Found");
       throw error;
     }
   };
- const handleSearch = async () => {
+  const handleSearch = async () => {
     if (searchCity.trim() === "") {
       return;
     }
 
     try {
       const { currentWeatherData } = await fetchWeatherData(searchCity);
-     setWeatherData(currentWeatherData)
-    }catch (error){
-      console.error("No Results Found")
+      setWeatherData(currentWeatherData);
+    } catch (error) {
+      console.error("No Results Found");
     }
   };
-
 
   const iconChanger = (weather: string) => {
     let iconElement: React.ReactNode;
@@ -126,14 +125,15 @@ const DisplayWeather = () => {
     <MainWrapper>
       <div className="container">
         <div className="searchArea">
-          <input type="text" placeholder="enter a city" 
-          value={searchCity}
-          onChange={(e) => setSearchCity(e.target.value)}
-          
+          <input
+            type="text"
+            placeholder="enter a city"
+            value={searchCity}
+            onChange={(e) => setSearchCity(e.target.value)}
           />
 
           <div className="searchCircle">
-            <AiOutlineSearch className="searchIcon" onClick={handleSearch}/>
+            <AiOutlineSearch className="searchIcon" onClick={handleSearch} />
           </div>
         </div>
 

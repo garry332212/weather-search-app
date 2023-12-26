@@ -42,11 +42,12 @@ const DisplayWeather = () => {
 
   const [searchCity, setSearchCity] = React.useState("");
 
-  const fetchCurrentWeather = async (lat: number, lon: number) => {
+ 
+  const fetchCurrentWeather = React.useCallback(async (lat: number, lon: number) => {
     const url = `${api_Endpoint}weather?lat=${lat}&lon=${lon}&appid=${api_key}&units=metric`;
     const response = await axios.get(url);
     return response.data;
-  };
+  }, [api_Endpoint, api_key]);
 
   const fetchWeatherData = async (city: string) => {
     try {
@@ -56,7 +57,6 @@ const DisplayWeather = () => {
       const currentWeatherData: WeatherDataProps = searchResponse.data;
       return { currentWeatherData };
     } catch (error) {
-      console.error("No Data Found");
       throw error;
     }
   };
@@ -69,7 +69,6 @@ const DisplayWeather = () => {
       const { currentWeatherData } = await fetchWeatherData(searchCity);
       setWeatherData(currentWeatherData);
     } catch (error) {
-      console.error("No Results Found");
     }
   };
 
@@ -108,18 +107,19 @@ const DisplayWeather = () => {
     );
   };
 
+
   React.useEffect(() => {
-    navigator.geolocation.getCurrentPosition((position) => {
-      const { latitude, longitude } = position.coords;
-      Promise.all([fetchCurrentWeather(latitude, longitude)]).then(
-        ([currentWeather]) => {
-          setWeatherData(currentWeather);
-          setIsLoading(true);
-          console.log(currentWeather);
-        }
-      );
-    });
-  }, []);
+    const fetchData = async () => {
+      navigator.geolocation.getCurrentPosition(async (position) => {
+        const { latitude, longitude } = position.coords;
+        const [currentWeather] = await Promise.all([fetchCurrentWeather(latitude, longitude)]);
+        setWeatherData(currentWeather);
+        setIsLoading(true);
+      });
+    };
+
+    fetchData();
+  }, [fetchCurrentWeather]);
 
   return (
     <MainWrapper>
